@@ -20,6 +20,11 @@ module.exports = function(grunt) {
       options: {
         jshintrc: '.jshintrc'
       }
+    },
+    venus: {
+      all: [
+        'examples/arrays.spec.js'
+      ]
     }
   });
 

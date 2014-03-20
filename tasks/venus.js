@@ -8,11 +8,10 @@
 
 'use strict';
 
+var exec = require('child_process').exec;
+var q = require('q');
+
 module.exports = function(grunt) {
-
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
-
   grunt.registerMultiTask('venus', 'Run JS unit tests using venus', function() {
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
@@ -20,31 +19,45 @@ module.exports = function(grunt) {
       separator: ', '
     });
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
+    var done = this.async();
+    var venus = './node_modules/venus/bin/venus';
+
+    var promisedExec = function(cmd) {
+      var def = q.defer();
+      exec(cmd, function(err, stdout, stderr) {
+        if (stderr) {
+          console.log(stderr);
+          def.reject();
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
 
-      // Handle options.
-      src += options.punctuation;
+        console.log(stdout);
 
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
+        if (err) {
+          return def.reject();
+        }
+        def.resolve();
+      });
+      return def.promise;
+    };
 
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
+    var next;
+    this.files.forEach(function(f) {
+      f.orig.src.forEach(function(path) {
+        var command = venus + ' run -t ' + path + ' -n';
+        if (!next) {
+          next = promisedExec(command);
+        } else {
+          next = next.then(function() {
+            return promisedExec(command);
+          });
+        }
+      });
+    });
+
+    next.then(function() {
+      done();
+    }).catch(function() {
+      grunt.log.error('There was an error');
     });
   });
-
 };
