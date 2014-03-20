@@ -21,16 +21,22 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc'
       }
     },
+
     venus: {
       all: [
         'examples/arrays.spec.js'
       ]
+    },
+
+    nodeunit: {
+      all: ['test/**/*_test.js']
     }
   });
 
   grunt.loadTasks('tasks');
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-nodeunit');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['jshint', 'venus', 'nodeunit']);
 };

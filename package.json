@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-nodeunit": "0.3.3",
     "grunt": "~0.4.4",
     "q": "1.0.1",
     "venus": "2.3.1"
