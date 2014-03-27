@@ -15,7 +15,7 @@ var q = require('q');
  * Command that will execute venus binary
  * @type {string}
  */
-var VENUS_BINARY = './node_modules/venus/bin/venus';
+var VENUS_BINARY = 'venus';
 
 /**
  * A promise version of node'si child_process.exec

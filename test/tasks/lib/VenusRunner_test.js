@@ -87,9 +87,9 @@ exports.runVenusForFiles = {
     venusRunner.runVenusForFiles(files);
 
     var args = venusRunner.promisedExec.args;
-    test.equals(args[0][0], './node_modules/venus/bin/venus run -t somePath -n');
-    test.equals(args[1][0], './node_modules/venus/bin/venus run -t anotherPath -n');
-    test.equals(args[2][0], './node_modules/venus/bin/venus run -t hello -n');
+    test.equals(args[0][0], 'venus run -t somePath -n');
+    test.equals(args[1][0], 'venus run -t anotherPath -n');
+    test.equals(args[2][0], 'venus run -t hello -n');
 
     venusRunner.promisedExec.restore();
     test.done();
