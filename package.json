@@ -1,7 +1,7 @@
 {
   "name": "grunt-venus",
   "description": "Run JS unit tests using venus",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "https://github.com/soonick/grunt-venus",
   "author": {
     "name": "Adrian Ancona Novelo",
@@ -32,9 +32,6 @@
     "grunt-contrib-nodeunit": "0.3.3",
     "q": "1.0.1",
     "sinon": "1.9.0"
-  },
-  "dependencies": {
-    "venus": "2.3.1"
   },
   "peerDependencies": {
     "grunt": "~0.4.4"
