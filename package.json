@@ -1,7 +1,7 @@
 {
   "name": "grunt-venus",
   "description": "Run JS unit tests using venus",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "homepage": "https://github.com/soonick/grunt-venus",
   "author": {
     "name": "Adrian Ancona Novelo",
