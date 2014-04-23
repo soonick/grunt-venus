@@ -18,7 +18,7 @@ module.exports = function(grunt) {
       done(0);
     })['catch'](function() {
       grunt.log.error('There was an error');
-      done(1);
+      done(false);
     });
   });
 };
