@@ -61,6 +61,19 @@ exports.promisedExec = {
 };
 
 exports.runVenusForFiles = {
+  setUp: function(callback) {
+    var promiseMock = {
+      then: sinon.stub().yields()
+    };
+    sinon.stub(venusRunner, 'promisedExec').returns(promiseMock);
+    callback();
+  },
+
+  tearDown: function(callback) {
+    venusRunner.promisedExec.restore();
+    callback();
+  },
+
   callsPromisedExecInOrder: function(test) {
     var files = [
       {
@@ -79,10 +92,6 @@ exports.runVenusForFiles = {
         }
       }
     ];
-    var promiseMock = {
-      then: sinon.stub().yields()
-    };
-    sinon.stub(venusRunner, 'promisedExec').returns(promiseMock);
 
     venusRunner.runVenusForFiles(files);
 
@@ -91,7 +100,24 @@ exports.runVenusForFiles = {
     test.equals(args[1][0], 'venus run -t anotherPath -n');
     test.equals(args[2][0], 'venus run -t hello -n');
 
-    venusRunner.promisedExec.restore();
+    test.done();
+  },
+
+  addsReporterParameterIfPassedInOptions: function(test) {
+    var options = {
+      reporter: 'DotReporter'
+    };
+    var files = [{
+      orig: {
+        src: ['hello']
+      }
+    }];
+
+    venusRunner.runVenusForFiles(files, options);
+
+    var args = venusRunner.promisedExec.args;
+    test.equals(args[0][0], 'venus run -t hello -n --reporter DotReporter');
+
     test.done();
   }
 };

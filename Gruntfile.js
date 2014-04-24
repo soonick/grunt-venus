@@ -25,7 +25,10 @@ module.exports = function(grunt) {
     venus: {
       all: [
         'examples/arrays.spec.js'
-      ]
+      ],
+      options: {
+        reporter: 'DotReporter'
+      }
     },
 
     nodeunit: {

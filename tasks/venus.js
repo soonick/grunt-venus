@@ -13,8 +13,9 @@ var venusRunner = require('./lib/VenusRunner');
 module.exports = function(grunt) {
   grunt.registerMultiTask('venus', 'Run JS unit tests using venus', function() {
     var done = this.async();
+    var options = this.options({});
 
-    venusRunner.runVenusForFiles(this.files).then(function() {
+    venusRunner.runVenusForFiles(this.files, options).then(function() {
       done(0);
     })['catch'](function() {
       grunt.log.error('There was an error');

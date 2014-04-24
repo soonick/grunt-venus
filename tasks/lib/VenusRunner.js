@@ -42,13 +42,20 @@ var promisedExec = function(cmd) {
 /**
  * Runs venus for each of the specified files
  * @param {array} files - Files object from grunt multitask
+ * @param {array} options
  */
-var runVenusForFiles = function(files) {
+var runVenusForFiles = function(files, options) {
+  options = options || {};
   var next;
 
   files.forEach(function(f) {
     f.orig.src.forEach(function(path) {
       var command = VENUS_BINARY + ' run -t ' + path + ' -n';
+
+      if (options.reporter) {
+        command += ' --reporter ' + options.reporter;
+      }
+
       if (!next) {
         next = module.exports.promisedExec(command);
       } else {
