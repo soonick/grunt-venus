@@ -3,11 +3,19 @@ var sinon = require('sinon');
 
 var venusRunner = require('../../../tasks/lib/VenusRunner');
 
-
 exports.promisedExec = {
   setUp: function(callback) {
     // Stubbing so it doesn't actually print
     sinon.stub(console, 'log');
+    this.mockProcess = {
+      stdout: {
+        on: sinon.spy()
+      },
+      stderr: {
+        on: sinon.spy()
+      },
+      on: sinon.stub()
+    };
     callback();
   },
 
@@ -19,43 +27,46 @@ exports.promisedExec = {
   returnsPromise: function(test) {
     sinon.stub(cp, 'exec');
 
-    var p = venusRunner.promisedExec('ls');
+    var p = venusRunner.promisedExec();
     test.equals(p.constructor.name, 'Promise');
 
     cp.exec.restore();
     test.done();
   },
 
-  callsExecWithGivenCommand: function(test) {
-    sinon.stub(cp, 'exec');
+  callsSpawnWithGivenArgs: function(test) {
+    sinon.stub(cp, 'spawn').returns(this.mockProcess);
 
-    venusRunner.promisedExec('ls');
+    venusRunner.promisedExec(['hello']);
 
-    test.equals(cp.exec.args[0][0], 'ls');
+    test.equals(cp.spawn.args[0][0], 'venus');
+    test.deepEqual(cp.spawn.args[0][1], ['hello']);
 
-    cp.exec.restore();
+    cp.spawn.restore();
     test.done();
   },
 
   rejectsPromiseIfThereIsAnError: function(test) {
-    sinon.stub(cp, 'exec').yields(true);
+    this.mockProcess.on.yields(1);
+    sinon.stub(cp, 'spawn').returns(this.mockProcess);
 
-    var p = venusRunner.promisedExec('ls');
+    var p = venusRunner.promisedExec(['hello']);
 
     test.ok(p.isRejected());
 
-    cp.exec.restore();
+    cp.spawn.restore();
     test.done();
   },
 
   resolvesPromiseIfThereAreNoErrors: function(test) {
-    sinon.stub(cp, 'exec').yields(false);
+    this.mockProcess.on.yields(0);
+    sinon.stub(cp, 'spawn').returns(this.mockProcess);
 
-    var p = venusRunner.promisedExec('ls');
+    var p = venusRunner.promisedExec(['hello']);
 
     test.ok(p.isFulfilled());
 
-    cp.exec.restore();
+    cp.spawn.restore();
     test.done();
   }
 };
@@ -96,9 +107,9 @@ exports.runVenusForFiles = {
     venusRunner.runVenusForFiles(files);
 
     var args = venusRunner.promisedExec.args;
-    test.equals(args[0][0], 'venus run -t somePath -n');
-    test.equals(args[1][0], 'venus run -t anotherPath -n');
-    test.equals(args[2][0], 'venus run -t hello -n');
+    test.deepEqual(args[0][0], ['run', '-t', 'somePath', '-n']);
+    test.deepEqual(args[1][0], ['run', '-t', 'anotherPath', '-n']);
+    test.deepEqual(args[2][0], ['run', '-t', 'hello', '-n']);
 
     test.done();
   },
@@ -116,7 +127,8 @@ exports.runVenusForFiles = {
     venusRunner.runVenusForFiles(files, options);
 
     var args = venusRunner.promisedExec.args;
-    test.equals(args[0][0], 'venus run -t hello -n --reporter DotReporter');
+    var expected = ['run', '-t', 'hello', '-n', '--reporter', 'DotReporter'];
+    test.deepEqual(args[0][0], expected);
 
     test.done();
   }

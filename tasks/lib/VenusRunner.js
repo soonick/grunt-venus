@@ -23,14 +23,22 @@ var VENUS_BINARY = 'venus';
  * @returns {object} Promise that will be fulfilled when the command is done
  *          executing
  */
-var promisedExec = function(cmd) {
+var promisedExec = function(args) {
   var def = q.defer();
 
-  cp.exec(cmd, function(err, stdout, stderr) {
-    console.log(stderr);
-    console.log(stdout);
+  var venusCmd = cp.spawn(VENUS_BINARY, args);
 
-    if (err) {
+  venusCmd.stdout.on('data', function (data) {
+    console.log(data.toString());
+  });
+
+  venusCmd.stderr.on('data', function (data) {
+    console.log('stderr: ' + data.toString());
+  });
+
+  venusCmd.on('close', function (code) {
+    console.log('child process exited with code ' + code);
+    if (code !== 0) {
       return def.reject();
     }
     def.resolve();
@@ -50,17 +58,18 @@ var runVenusForFiles = function(files, options) {
 
   files.forEach(function(f) {
     f.orig.src.forEach(function(path) {
-      var command = VENUS_BINARY + ' run -t ' + path + ' -n';
+      var args = ['run', '-t', path, '-n'];
 
       if (options.reporter) {
-        command += ' --reporter ' + options.reporter;
+        args.push('--reporter');
+        args.push(options.reporter);
       }
 
       if (!next) {
-        next = module.exports.promisedExec(command);
+        next = module.exports.promisedExec(args);
       } else {
         next = next.then(function() {
-          return module.exports.promisedExec(command);
+          return module.exports.promisedExec(args);
         });
       }
     });
